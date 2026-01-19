@@ -11,8 +11,8 @@ mkdir -p \
   "$TARGET_DIR/engineering/security-hub" \
   "$TARGET_DIR/engineering/monitoring/infrastructure" \
   "$TARGET_DIR/engineering/monitoring/application-performance" \
-  "$TARGET_DIR/engineering/database/dev" \
-  "$TARGET_DIR/engineering/database/prod"
+  "$TARGET_DIR/engineering/monitoring/database/dev" \
+  "$TARGET_DIR/engineering/monitoring/database/prod"
 
 cat > "$TARGET_DIR/analytics-insights/spec.yml" <<'SPEC'
 name: Analytics Insights
@@ -49,12 +49,12 @@ name: Application Performance
 description: Service latency, error budgets, and transaction tracing.
 SPEC
 
-cat > "$TARGET_DIR/engineering/database/dev/spec.yml" <<'SPEC'
+cat > "$TARGET_DIR/engineering/monitoring/database/dev/spec.yml" <<'SPEC'
 name: Dev
 description: Development database activity, migrations, and query diagnostics.
 SPEC
 
-cat > "$TARGET_DIR/engineering/database/prod/spec.yml" <<'SPEC'
+cat > "$TARGET_DIR/engineering/monitoring/database/prod/spec.yml" <<'SPEC'
 name: Prod
 description: Production database uptime, replication, and slow query watchlists.
 SPEC
