@@ -14,93 +14,167 @@
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen">
-  <div class="mx-auto max-w-6xl px-6 py-10 space-y-10">
-    <header class="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
-      <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div class="space-y-3">
-          <p class="text-sm uppercase tracking-[0.4em] text-slate-500">Elastic Application ServicE</p>
-          <h1 class="text-3xl font-semibold text-slate-900 sm:text-4xl">App Catalog</h1>
-          <p class="text-sm text-slate-600">Discover, organize, and launch your containerized apps from one place.</p>
+<body class="bg-slate-100 text-slate-900 min-h-screen">
+  <div class="flex min-h-screen">
+    <aside class="flex w-full max-w-xs flex-col border-r border-slate-200 bg-white">
+      <div class="border-b border-slate-200 p-6">
+        <div class="flex items-center gap-3">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white">
+            <svg aria-hidden="true" viewBox="0 0 48 48" class="h-8 w-8">
+              <path fill="currentColor" d="M6 12h18v6H6zM6 24h30v6H6zM6 36h24v6H6z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.4em] text-slate-500">Elastic Application ServicE</p>
+            <h1 class="text-xl font-semibold text-slate-900">EASe Workspace</h1>
+          </div>
         </div>
-        <div class="flex flex-wrap gap-3">
-          <span class="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">Apps: {{.TotalApps}}</span>
-          <span class="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">Specs: {{.SpecMatches}}</span>
-          <span class="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">Every {{.ScanEvery}}</span>
-        </div>
-      </div>
-      <div class="mt-6 grid gap-4 text-sm text-slate-600 sm:grid-cols-2">
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div class="text-xs uppercase tracking-[0.3em] text-slate-400">Apps directory</div>
-          <div class="mt-2 font-mono text-sm text-slate-700">{{if .AppsDir}}{{.AppsDir}}{{else}}Not configured{{end}}</div>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div class="text-xs uppercase tracking-[0.3em] text-slate-400">Last scan</div>
-          <div class="mt-2 text-sm text-slate-700">{{if .LastScan.IsZero}}never{{else}}{{.LastScan.Format "2006-01-02 15:04:05 MST"}}{{end}}</div>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <span class="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">Apps: {{.TotalApps}}</span>
+          <span class="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">Specs: {{.SpecMatches}}</span>
         </div>
       </div>
-      {{if .LastError}}
-        <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-          {{.LastError}}
-        </div>
-      {{end}}
-    </header>
 
-    {{template "group" .Root}}
-
-    {{define "group"}}
-      <section class="space-y-4">
-        <details class="rounded-3xl border border-slate-200 bg-white shadow-sm" open>
-          <summary class="cursor-pointer px-6 py-5">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-400"></div>
-                <div>
-                  <h2 class="text-lg font-semibold text-slate-900">
-                    {{if .Path}}Group: {{.Path}}{{else}}Ungrouped Apps{{end}}
-                  </h2>
-                  <p class="text-sm text-slate-500">{{len .Apps}} app(s) in this section</p>
-                </div>
-              </div>
-              <span class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Toggle</span>
+      <div class="flex-1 space-y-4 overflow-y-auto px-4 py-6">
+        <details class="rounded-2xl border border-slate-200 bg-slate-50 group" open>
+          <summary class="flex cursor-pointer items-center justify-between px-4 py-3">
+            <div>
+              <h2 class="text-sm font-semibold text-slate-900">Running Apps</h2>
+              <p class="text-xs text-slate-500">Active sessions right now</p>
             </div>
+            <span class="text-slate-400 transition group-open:rotate-180" aria-hidden="true">
+              <svg viewBox="0 0 20 20" class="h-4 w-4" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.2l3.71-3.97a.75.75 0 1 1 1.08 1.04l-4.25 4.55a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+              </svg>
+            </span>
           </summary>
-
-          <div class="px-6 pb-6 space-y-6">
-            {{if .Apps}}
-              <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {{range .Apps}}
-                  <article class="group rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300">
-                    <div class="flex items-start justify-between gap-4">
-                      <div class="space-y-2">
-                        <h3 class="text-lg font-semibold text-slate-900">{{.Name}}</h3>
-                        {{if .Description}}
-                          <p class="text-sm text-slate-600">{{.Description}}</p>
-                        {{else}}
-                          <p class="text-sm italic text-slate-400">No description in spec.yml.</p>
-                        {{end}}
-                      </div>
-                      <span class="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-500">App</span>
-                    </div>
-                    <div class="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
-                      <span class="font-mono">{{.RelativeDir}}</span>
-                    </div>
-                  </article>
-                {{end}}
-              </div>
-            {{else}}
-              <p class="text-sm italic text-slate-400">No apps in this group.</p>
-            {{end}}
-
-            {{range .Groups}}
-              <div class="pt-4">
-                {{template "group" .}}
-              </div>
-            {{end}}
+          <div class="space-y-3 px-4 pb-4 text-sm">
+            <div class="rounded-xl border border-slate-200 bg-white p-3">
+              <p class="font-medium text-slate-900">Dev Hub</p>
+              <p class="text-xs text-slate-500">Running · 2 tabs</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-white p-3">
+              <p class="font-medium text-slate-900">Observability</p>
+              <p class="text-xs text-slate-500">Running · 1 tab</p>
+            </div>
           </div>
         </details>
-      </section>
-    {{end}}
+
+        <details class="rounded-2xl border border-slate-200 bg-slate-50 group" open>
+          <summary class="flex cursor-pointer items-center justify-between px-4 py-3">
+            <div>
+              <h2 class="text-sm font-semibold text-slate-900">Available Apps</h2>
+              <p class="text-xs text-slate-500">Browse all catalog items</p>
+            </div>
+            <span class="text-slate-400 transition group-open:rotate-180" aria-hidden="true">
+              <svg viewBox="0 0 20 20" class="h-4 w-4" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.2l3.71-3.97a.75.75 0 1 1 1.08 1.04l-4.25 4.55a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+              </svg>
+            </span>
+          </summary>
+          <div class="space-y-4 px-4 pb-4">
+            {{template "group" .Root}}
+          </div>
+        </details>
+      </div>
+
+      <div class="border-t border-slate-200 p-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full bg-slate-200"></div>
+            <div>
+              <p class="text-sm font-semibold text-slate-900">Avery Taylor</p>
+              <p class="text-xs text-slate-500">Workspace Admin</p>
+            </div>
+          </div>
+          <button class="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 transition hover:border-slate-300 hover:text-slate-700" aria-label="Open settings">
+            <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12a7.5 7.5 0 0 0-.08-1.12l1.7-1.32-1.5-2.6-2.02.78a7.5 7.5 0 0 0-1.93-1.12l-.3-2.15h-3l-.3 2.15a7.5 7.5 0 0 0-1.93 1.12l-2.02-.78-1.5 2.6 1.7 1.32a7.5 7.5 0 0 0 0 2.24l-1.7 1.32 1.5 2.6 2.02-.78c.6.48 1.25.86 1.93 1.12l.3 2.15h3l.3-2.15c.68-.26 1.33-.64 1.93-1.12l2.02.78 1.5-2.6-1.7-1.32c.05-.37.08-.74.08-1.12Z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="flex flex-1 flex-col bg-white">
+      <header class="flex items-center justify-between border-b border-slate-200 px-8 py-5">
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Tabs</span>
+          <span class="text-sm text-slate-500">No open tabs</span>
+        </div>
+        <button class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">New Tab</button>
+      </header>
+      <div class="flex flex-1 items-center justify-center bg-slate-50 p-10">
+        <div class="max-w-md text-center">
+          <div class="mx-auto grid h-32 w-32 place-items-center rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-sm">
+            <span class="text-3xl font-bold tracking-[0.3em]">EASe</span>
+          </div>
+          <h2 class="mt-6 text-2xl font-semibold text-slate-900">Your workspace is ready</h2>
+          <p class="mt-3 text-sm text-slate-600">Use the navigation panel on the left to open an app and populate your workspace tabs.</p>
+          <div class="mt-6 flex flex-wrap justify-center gap-3 text-xs text-slate-500">
+            <div class="rounded-full border border-slate-200 bg-white px-4 py-2">Apps directory: {{if .AppsDir}}{{.AppsDir}}{{else}}Not configured{{end}}</div>
+            <div class="rounded-full border border-slate-200 bg-white px-4 py-2">Last scan: {{if .LastScan.IsZero}}never{{else}}{{.LastScan.Format "2006-01-02 15:04:05 MST"}}{{end}}</div>
+          </div>
+          {{if .LastError}}
+            <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+              {{.LastError}}
+            </div>
+          {{end}}
+        </div>
+      </div>
+    </main>
   </div>
+
+  {{define "group"}}
+    <section class="space-y-3">
+      <details class="rounded-2xl border border-slate-200 bg-white group" open>
+        <summary class="flex cursor-pointer items-center justify-between px-4 py-3">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-900">
+              {{if .Path}}Group: {{.Path}}{{else}}Ungrouped Apps{{end}}
+            </h3>
+            <p class="text-xs text-slate-500">{{len .Apps}} app(s)</p>
+          </div>
+          <span class="text-slate-400 transition group-open:rotate-180" aria-hidden="true">
+            <svg viewBox="0 0 20 20" class="h-4 w-4" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.2l3.71-3.97a.75.75 0 1 1 1.08 1.04l-4.25 4.55a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+            </svg>
+          </span>
+        </summary>
+
+        <div class="space-y-3 px-4 pb-4">
+          {{if .Apps}}
+            {{range .Apps}}
+              <article class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <h4 class="text-sm font-semibold text-slate-900">{{.Name}}</h4>
+                    {{if .Description}}
+                      <p class="text-xs text-slate-600">{{.Description}}</p>
+                    {{else}}
+                      <p class="text-xs italic text-slate-400">No description in spec.yml.</p>
+                    {{end}}
+                  </div>
+                  <span class="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-500">App</span>
+                </div>
+                <div class="mt-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] text-slate-500">
+                  <span class="font-mono">{{.RelativeDir}}</span>
+                </div>
+              </article>
+            {{end}}
+          {{else}}
+            <p class="text-xs italic text-slate-400">No apps in this group.</p>
+          {{end}}
+
+          {{range .Groups}}
+            <div class="pt-2">
+              {{template "group" .}}
+            </div>
+          {{end}}
+        </div>
+      </details>
+    </section>
+  {{end}}
 </body>
 </html>
