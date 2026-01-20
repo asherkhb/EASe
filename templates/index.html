@@ -12,95 +12,256 @@
     summary::-webkit-details-marker {
       display: none;
     }
+    /* Tree item hover and selection states */
+    .tree-item:hover {
+      background-color: rgb(241 245 249); /* slate-100 */
+    }
+    .tree-item summary:hover {
+      background-color: rgb(241 245 249); /* slate-100 */
+    }
+    /* Chevron rotation for folder items */
+    details.tree-folder > summary .chevron {
+      transition: transform 0.15s ease-out;
+    }
+    details.tree-folder[open] > summary .chevron {
+      transform: rotate(90deg);
+    }
+    /* Sidebar collapse/expand */
+    .sidebar {
+      transition: width 0.2s ease-out, min-width 0.2s ease-out;
+    }
+    .sidebar.collapsed {
+      width: 64px !important;
+      min-width: 64px !important;
+    }
+    .sidebar.collapsed .sidebar-collapsible {
+      opacity: 0;
+      pointer-events: none;
+      width: 0;
+      overflow: hidden;
+    }
+    .sidebar.collapsed .sidebar-toggle-icon {
+      transform: rotate(180deg);
+    }
+    .sidebar.collapsed .header-text {
+      display: none;
+    }
+    .sidebar.collapsed .user-info {
+      display: none;
+    }
+    .sidebar.collapsed .settings-btn {
+      display: none;
+    }
+    .sidebar-collapsible {
+      transition: opacity 0.15s ease-out;
+    }
+    .sidebar-toggle-icon {
+      transition: transform 0.2s ease-out;
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen">
-  <div class="mx-auto max-w-6xl px-6 py-10 space-y-10">
-    <header class="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
-      <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div class="space-y-3">
-          <p class="text-sm uppercase tracking-[0.4em] text-slate-500">Elastic Application ServicE</p>
-          <h1 class="text-3xl font-semibold text-slate-900 sm:text-4xl">App Catalog</h1>
-          <p class="text-sm text-slate-600">Discover, organize, and launch your containerized apps from one place.</p>
-        </div>
-        <div class="flex flex-wrap gap-3">
-          <span class="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">Apps: {{.TotalApps}}</span>
-          <span class="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">Specs: {{.SpecMatches}}</span>
-          <span class="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">Every {{.ScanEvery}}</span>
-        </div>
-      </div>
-      <div class="mt-6 grid gap-4 text-sm text-slate-600 sm:grid-cols-2">
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div class="text-xs uppercase tracking-[0.3em] text-slate-400">Apps directory</div>
-          <div class="mt-2 font-mono text-sm text-slate-700">{{if .AppsDir}}{{.AppsDir}}{{else}}Not configured{{end}}</div>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div class="text-xs uppercase tracking-[0.3em] text-slate-400">Last scan</div>
-          <div class="mt-2 text-sm text-slate-700">{{if .LastScan.IsZero}}never{{else}}{{.LastScan.Format "2006-01-02 15:04:05 MST"}}{{end}}</div>
+<body class="bg-slate-100 text-slate-900 h-screen overflow-hidden">
+  <div class="flex h-screen">
+    <aside class="sidebar flex w-full max-w-xs min-w-[320px] flex-col border-r border-slate-200 bg-white overflow-hidden">
+      <!-- Header with App Icon -->
+      <div class="border-b border-slate-200 p-3 flex items-center gap-3">
+        <button 
+          onclick="document.querySelector('.sidebar').classList.toggle('collapsed')"
+          class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white flex-shrink-0 hover:bg-slate-800 transition-colors cursor-pointer"
+          aria-label="Toggle sidebar"
+          title="Toggle sidebar"
+        >
+          <svg aria-hidden="true" viewBox="0 0 48 48" class="h-6 w-6">
+            <path fill="currentColor" d="M6 12h18v6H6zM6 24h30v6H6zM6 36h24v6H6z" />
+          </svg>
+        </button>
+        <div class="header-text min-w-0 flex-1">
+          <p class="text-[10px] uppercase tracking-[0.3em] text-slate-500 truncate">Elastic Application ServicE</p>
+          <h1 class="text-base font-semibold text-slate-900 truncate">EASe Workspace</h1>
         </div>
       </div>
-      {{if .LastError}}
-        <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-          {{.LastError}}
-        </div>
-      {{end}}
-    </header>
 
-    {{template "group" .Root}}
-
-    {{define "group"}}
-      <section class="space-y-4">
-        <details class="rounded-3xl border border-slate-200 bg-white shadow-sm" open>
-          <summary class="cursor-pointer px-6 py-5">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-400"></div>
-                <div>
-                  <h2 class="text-lg font-semibold text-slate-900">
-                    {{if .Path}}Group: {{.Path}}{{else}}Ungrouped Apps{{end}}
-                  </h2>
-                  <p class="text-sm text-slate-500">{{len .Apps}} app(s) in this section</p>
-                </div>
-              </div>
-              <span class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Toggle</span>
-            </div>
+      <!-- Collapsible Middle Content -->
+      <div class="sidebar-collapsible flex-1 overflow-y-auto">
+        <!-- Running Apps Section -->
+        <details class="border-b border-slate-200" open>
+          <summary class="flex cursor-pointer items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500 hover:bg-slate-50">
+            <svg class="h-3 w-3 chevron" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.2 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.55 4.25a.75.75 0 0 1 0 1.08l-4.55 4.25a.75.75 0 0 1-1.06-.02Z" clip-rule="evenodd" />
+            </svg>
+            Running Apps
           </summary>
-
-          <div class="px-6 pb-6 space-y-6">
-            {{if .Apps}}
-              <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {{range .Apps}}
-                  <article class="group rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300">
-                    <div class="flex items-start justify-between gap-4">
-                      <div class="space-y-2">
-                        <h3 class="text-lg font-semibold text-slate-900">{{.Name}}</h3>
-                        {{if .Description}}
-                          <p class="text-sm text-slate-600">{{.Description}}</p>
-                        {{else}}
-                          <p class="text-sm italic text-slate-400">No description in spec.yml.</p>
-                        {{end}}
-                      </div>
-                      <span class="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-500">App</span>
-                    </div>
-                    <div class="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
-                      <span class="font-mono">{{.RelativeDir}}</span>
-                    </div>
-                  </article>
-                {{end}}
-              </div>
-            {{else}}
-              <p class="text-sm italic text-slate-400">No apps in this group.</p>
-            {{end}}
-
-            {{range .Groups}}
-              <div class="pt-4">
-                {{template "group" .}}
-              </div>
-            {{end}}
+          <div class="pb-2">
+            <div class="flex items-center gap-2 px-6 py-1.5 text-sm text-slate-600 hover:bg-slate-50 cursor-pointer">
+              <svg class="h-4 w-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                <circle cx="10" cy="10" r="4" />
+              </svg>
+              <span>Dev Hub</span>
+            </div>
+            <div class="flex items-center gap-2 px-6 py-1.5 text-sm text-slate-600 hover:bg-slate-50 cursor-pointer">
+              <svg class="h-4 w-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                <circle cx="10" cy="10" r="4" />
+              </svg>
+              <span>Observability</span>
+            </div>
           </div>
         </details>
-      </section>
-    {{end}}
+
+        <!-- Available Apps Section (File Explorer Style) -->
+        <details class="border-b border-slate-200" open>
+          <summary class="flex cursor-pointer items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500 hover:bg-slate-50">
+            <svg class="h-3 w-3 chevron" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.2 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.55 4.25a.75.75 0 0 1 0 1.08l-4.55 4.25a.75.75 0 0 1-1.06-.02Z" clip-rule="evenodd" />
+            </svg>
+            Available Apps
+          </summary>
+          <div class="pb-2">
+            {{template "tree-root" .Root}}
+          </div>
+        </details>
+      </div>
+
+      <!-- Footer with User Avatar -->
+      <div class="border-t border-slate-200 p-3">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center text-slate-500">
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z" />
+            </svg>
+          </div>
+          <div class="user-info min-w-0 flex-1">
+            <p class="text-sm font-semibold text-slate-900 truncate">Avery Taylor</p>
+            <p class="text-xs text-slate-500 truncate">Workspace Admin</p>
+          </div>
+          <button class="settings-btn rounded-lg border border-slate-200 bg-white p-2 text-slate-500 transition hover:border-slate-300 hover:text-slate-700 flex-shrink-0" aria-label="Open settings">
+            <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12a7.5 7.5 0 0 0-.08-1.12l1.7-1.32-1.5-2.6-2.02.78a7.5 7.5 0 0 0-1.93-1.12l-.3-2.15h-3l-.3 2.15a7.5 7.5 0 0 0-1.93 1.12l-2.02-.78-1.5 2.6 1.7 1.32a7.5 7.5 0 0 0 0 2.24l-1.7 1.32 1.5 2.6 2.02-.78c.6.48 1.25.86 1.93 1.12l.3 2.15h3l.3-2.15c.68-.26 1.33-.64 1.93-1.12l2.02.78 1.5-2.6-1.7-1.32c.05-.37.08-.74.08-1.12Z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="flex flex-1 flex-col bg-white overflow-y-auto">
+      <div class="flex flex-1 items-center justify-center bg-slate-50 p-10">
+        <div class="max-w-md text-center">
+          <div class="mx-auto grid h-32 w-32 place-items-center rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-sm">
+            <span class="text-3xl font-bold tracking-[0.3em]">EASe</span>
+          </div>
+          <h2 class="mt-6 text-2xl font-semibold text-slate-900">Your workspace is ready</h2>
+          <p class="mt-3 text-sm text-slate-600">Use the navigation panel on the left to open an app and populate your workspace tabs.</p>
+          <div class="mt-6 flex flex-wrap justify-center gap-3 text-xs text-slate-500">
+            <div class="rounded-full border border-slate-200 bg-white px-4 py-2">Apps directory: {{if .AppsDir}}{{.AppsDir}}{{else}}Not configured{{end}}</div>
+            <div class="rounded-full border border-slate-200 bg-white px-4 py-2">Last scan: {{if .LastScan.IsZero}}never{{else}}{{.LastScan.Format "2006-01-02 15:04:05 MST"}}{{end}}</div>
+          </div>
+          {{if .LastError}}
+            <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+              {{.LastError}}
+            </div>
+          {{end}}
+        </div>
+      </div>
+    </main>
   </div>
+
+  {{define "tree-root"}}
+    {{/* Render root-level apps directly (like files in root of file explorer) */}}
+    {{range .Apps}}
+      {{template "tree-app" .}}
+    {{end}}
+    {{/* Render root-level groups (folders) */}}
+    {{range .Groups}}
+      {{template "tree-group" dict "Group" . "Depth" 0}}
+    {{end}}
+  {{end}}
+
+  {{define "tree-group"}}
+    {{$group := .Group}}
+    {{$depth := .Depth}}
+    {{$indent := printf "padding-left: %dpx" (add (mul $depth 16) 8)}}
+    <details class="tree-folder" data-path="{{$group.Path}}">
+      <summary class="flex cursor-pointer items-center gap-1.5 py-1 pr-2 text-sm text-slate-700" style="{{$indent}}">
+        <!-- Chevron -->
+        <svg class="h-3.5 w-3.5 text-slate-400 chevron flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.2 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.55 4.25a.75.75 0 0 1 0 1.08l-4.55 4.25a.75.75 0 0 1-1.06-.02Z" clip-rule="evenodd" />
+        </svg>
+        <!-- Folder Icon -->
+        <svg class="h-4 w-4 text-amber-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v10.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0 0 18 15.25v-8.5A1.75 1.75 0 0 0 16.25 5H9.236a1 1 0 0 1-.748-.334l-1.096-1.232A1.75 1.75 0 0 0 6.084 3H3.75Z" />
+        </svg>
+        <span class="truncate">{{$group.Name}}</span>
+      </summary>
+      <div>
+        {{/* Render apps in this group */}}
+        {{range $group.Apps}}
+          {{template "tree-app-nested" dict "App" . "Depth" (add $depth 1)}}
+        {{end}}
+        {{/* Render nested groups */}}
+        {{range $group.Groups}}
+          {{template "tree-group" dict "Group" . "Depth" (add $depth 1)}}
+        {{end}}
+      </div>
+    </details>
+  {{end}}
+
+  {{define "tree-app"}}
+    {{/* Root-level app (no extra indentation) */}}
+    <details class="tree-item" data-path="{{.ID}}">
+      <summary class="flex cursor-pointer items-center gap-1.5 py-1 pl-2 pr-2 text-sm text-slate-700">
+        <!-- Spacer to align with folder content -->
+        <span class="w-3.5"></span>
+        <!-- File/App Icon -->
+        <svg class="h-4 w-4 text-indigo-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M3 3.5A1.5 1.5 0 0 1 4.5 2h6.879a1.5 1.5 0 0 1 1.06.44l4.122 4.12a1.5 1.5 0 0 1 .439 1.061V16.5A1.5 1.5 0 0 1 15.5 18h-11A1.5 1.5 0 0 1 3 16.5v-13Z" />
+        </svg>
+        <span class="truncate">{{.Name}}</span>
+      </summary>
+      <!-- Expanded app details -->
+      <div class="ml-[22px] mr-2 mb-1 mt-0.5 rounded border border-slate-200 bg-slate-50 p-2">
+        <p class="text-xs text-slate-600 mb-2">
+          {{if .Description}}{{.Description}}{{else}}<span class="italic text-slate-400">No description</span>{{end}}
+        </p>
+        <!-- TODO: Wire up launch endpoint -->
+        <button disabled class="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed" title="Launch (coming soon)">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd" />
+          </svg>
+          Launch
+        </button>
+      </div>
+    </details>
+  {{end}}
+
+  {{define "tree-app-nested"}}
+    {{/* Nested app (with indentation based on depth) */}}
+    {{$app := .App}}
+    {{$depth := .Depth}}
+    {{$indent := printf "padding-left: %dpx" (add (mul $depth 16) 8)}}
+    <details class="tree-item" data-path="{{$app.ID}}">
+      <summary class="flex cursor-pointer items-center gap-1.5 py-1 pr-2 text-sm text-slate-700" style="{{$indent}}">
+        <!-- Spacer to align with folder chevron space -->
+        <span class="w-3.5"></span>
+        <!-- File/App Icon -->
+        <svg class="h-4 w-4 text-indigo-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M3 3.5A1.5 1.5 0 0 1 4.5 2h6.879a1.5 1.5 0 0 1 1.06.44l4.122 4.12a1.5 1.5 0 0 1 .439 1.061V16.5A1.5 1.5 0 0 1 15.5 18h-11A1.5 1.5 0 0 1 3 16.5v-13Z" />
+        </svg>
+        <span class="truncate">{{$app.Name}}</span>
+      </summary>
+      <!-- Expanded app details -->
+      <div class="mr-2 mb-1 mt-0.5 rounded border border-slate-200 bg-slate-50 p-2" style="margin-left: {{add (mul $depth 16) 30}}px">
+        <p class="text-xs text-slate-600 mb-2">
+          {{if $app.Description}}{{$app.Description}}{{else}}<span class="italic text-slate-400">No description</span>{{end}}
+        </p>
+        <!-- TODO: Wire up launch endpoint -->
+        <button disabled class="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed" title="Launch (coming soon)">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd" />
+          </svg>
+          Launch
+        </button>
+      </div>
+    </details>
+  {{end}}
 </body>
 </html>

@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -74,7 +75,7 @@ func main() {
 
 func applyScan(state *AppState, appsDir string, scanEvery time.Duration) {
 	catalog := Catalog{
-		Root:      &appdiscovery.Group{Name: "Apps", Path: ""},
+		Root:      nil,
 		LastScan:  time.Now(),
 		AppsDir:   appsDir,
 		ScanEvery: scanEvery,
@@ -82,6 +83,7 @@ func applyScan(state *AppState, appsDir string, scanEvery time.Duration) {
 
 	if appsDir == "" {
 		catalog.LastError = "apps_dir is not configured. Provide -apps_dir or set APPS_DIR."
+		catalog.Root = &appdiscovery.Group{Path: ""}
 		state.update(catalog)
 		return
 	}
@@ -110,7 +112,44 @@ func (state *AppState) snapshot() Catalog {
 
 func (state *AppState) handleIndex(w http.ResponseWriter, r *http.Request) {
 	catalog := state.snapshot()
-	tmpl, err := template.ParseFS(templateFS, "templates/index.html")
+
+	funcMap := template.FuncMap{
+		"basename": func(path string) string {
+			if path == "" {
+				return ""
+			}
+			// Use forward slash since paths are normalized to forward slashes
+			if idx := strings.LastIndex(path, "/"); idx != -1 {
+				return path[idx+1:]
+			}
+			return path
+		},
+		// dict creates a map from key-value pairs for passing multiple values to templates
+		"dict": func(values ...interface{}) map[string]interface{} {
+			if len(values)%2 != 0 {
+				return nil
+			}
+			dict := make(map[string]interface{}, len(values)/2)
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					return nil
+				}
+				dict[key] = values[i+1]
+			}
+			return dict
+		},
+		// add performs integer addition
+		"add": func(a, b int) int {
+			return a + b
+		},
+		// mul performs integer multiplication
+		"mul": func(a, b int) int {
+			return a * b
+		},
+	}
+
+	tmpl, err := template.New("index.html").Funcs(funcMap).ParseFS(templateFS, "templates/index.html")
 	if err != nil {
 		log.Printf("template parse error: %v", err)
 		http.Error(w, "template error", http.StatusInternalServerError)

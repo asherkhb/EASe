@@ -40,7 +40,7 @@ description: Metrics for Q4 campaign performance.
 ## Build
 
 ```
-go build -o ease ./...
+go build -o ease .
 ```
 
 The output binary (`ease`) is the only artifact you need to run.
