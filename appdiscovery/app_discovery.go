@@ -17,8 +17,9 @@ import (
 const RootPath = ""
 
 type AppSpec struct {
-	Name        string `yaml:"name"`
-	Description string `yaml:"description"`
+	Name        string   `yaml:"name"`
+	Description string   `yaml:"description"`
+	Groups      []string `yaml:"groups"` // Optional: restrict visibility to users in these groups
 }
 
 type App struct {
@@ -26,6 +27,7 @@ type App struct {
 	Name        string
 	Description string
 	SpecPath    string
+	Groups      []string // Optional: if empty, app is visible to all users
 }
 
 type Group struct {
@@ -117,6 +119,7 @@ func ScanApps(appsDir string) (ScanResult, error) {
 			Name:        appName,
 			Description: strings.TrimSpace(spec.Description),
 			SpecPath:    path,
+			Groups:      spec.Groups,
 		})
 		totalApps++
 		return nil
@@ -167,4 +170,88 @@ func sortGroups(group *Group) {
 	for _, child := range group.Groups {
 		sortGroups(child)
 	}
+}
+
+// UserGroupChecker is an interface for checking if a user belongs to a group.
+// This avoids a direct dependency on the auth package.
+type UserGroupChecker interface {
+	HasAnyGroup(groups []string) bool
+}
+
+// FilterForUser returns a filtered copy of the catalog tree,
+// keeping only apps that are visible to the given user.
+// An app is visible if:
+//   - It has no groups defined (visible to everyone), or
+//   - The user belongs to at least one of the app's groups
+//
+// Empty groups (groups with no visible apps and no non-empty subgroups)
+// are pruned from the result.
+func FilterForUser(root *Group, user UserGroupChecker) *Group {
+	if root == nil {
+		return nil
+	}
+	return filterGroup(root, user)
+}
+
+// filterGroup recursively filters a group and its children.
+func filterGroup(group *Group, user UserGroupChecker) *Group {
+	filtered := &Group{
+		Path:   group.Path,
+		Apps:   nil,
+		Groups: nil,
+	}
+
+	// Filter apps: keep apps with no groups or where user has a matching group
+	for _, app := range group.Apps {
+		if len(app.Groups) == 0 || user.HasAnyGroup(app.Groups) {
+			filtered.Apps = append(filtered.Apps, app)
+		}
+	}
+
+	// Recursively filter child groups
+	for _, child := range group.Groups {
+		filteredChild := filterGroup(child, user)
+		// Only include non-empty groups
+		if len(filteredChild.Apps) > 0 || len(filteredChild.Groups) > 0 {
+			filtered.Groups = append(filtered.Groups, filteredChild)
+		}
+	}
+
+	return filtered
+}
+
+// FilterForAnonymous returns a filtered copy of the catalog tree,
+// keeping only apps that have no group restrictions (visible to everyone).
+func FilterForAnonymous(root *Group) *Group {
+	if root == nil {
+		return nil
+	}
+	return filterGroupAnonymous(root)
+}
+
+// filterGroupAnonymous recursively filters for anonymous users.
+func filterGroupAnonymous(group *Group) *Group {
+	filtered := &Group{
+		Path:   group.Path,
+		Apps:   nil,
+		Groups: nil,
+	}
+
+	// Keep only apps with no groups
+	for _, app := range group.Apps {
+		if len(app.Groups) == 0 {
+			filtered.Apps = append(filtered.Apps, app)
+		}
+	}
+
+	// Recursively filter child groups
+	for _, child := range group.Groups {
+		filteredChild := filterGroupAnonymous(child)
+		// Only include non-empty groups
+		if len(filteredChild.Apps) > 0 || len(filteredChild.Groups) > 0 {
+			filtered.Groups = append(filtered.Groups, filteredChild)
+		}
+	}
+
+	return filtered
 }
