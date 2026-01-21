@@ -130,15 +130,25 @@
             </svg>
           </div>
           <div class="user-info min-w-0 flex-1">
-            <p class="text-sm font-semibold text-slate-900 truncate">Avery Taylor</p>
-            <p class="text-xs text-slate-500 truncate">Workspace Admin</p>
+            <p class="text-sm font-semibold text-slate-900 truncate">{{if .User}}{{.User.Username}}{{else}}Anonymous{{end}}</p>
+            <p class="text-xs text-slate-500 truncate">{{if and .User (ne .User.Username "Anonymous")}}Authenticated{{else}}Public Mode{{end}}</p>
           </div>
+          {{if and .User (ne .User.Username "Anonymous")}}
+          <form method="POST" action="/logout" class="flex-shrink-0">
+            <button type="submit" class="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 transition hover:border-slate-300 hover:text-slate-700" aria-label="Sign out" title="Sign out">
+              <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+              </svg>
+            </button>
+          </form>
+          {{else}}
           <button class="settings-btn rounded-lg border border-slate-200 bg-white p-2 text-slate-500 transition hover:border-slate-300 hover:text-slate-700 flex-shrink-0" aria-label="Open settings">
             <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12a7.5 7.5 0 0 0-.08-1.12l1.7-1.32-1.5-2.6-2.02.78a7.5 7.5 0 0 0-1.93-1.12l-.3-2.15h-3l-.3 2.15a7.5 7.5 0 0 0-1.93 1.12l-2.02-.78-1.5 2.6 1.7 1.32a7.5 7.5 0 0 0 0 2.24l-1.7 1.32 1.5 2.6 2.02-.78c.6.48 1.25.86 1.93 1.12l.3 2.15h3l.3-2.15c.68-.26 1.33-.64 1.93-1.12l2.02.78 1.5-2.6-1.7-1.32c.05-.37.08-.74.08-1.12Z" />
             </svg>
           </button>
+          {{end}}
         </div>
       </div>
     </aside>
