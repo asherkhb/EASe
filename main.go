@@ -259,9 +259,6 @@ func handleIndex(w http.ResponseWriter, r *http.Request, state *AppState, tmpl *
 func handleIndexPublic(w http.ResponseWriter, r *http.Request, state *AppState, tmpl *template.Template) {
 	catalog := state.snapshot()
 
-	// In public mode, show only apps without group restrictions
-	catalog.Root = appdiscovery.FilterForAnonymous(catalog.Root)
-
 	data := PageData{
 		Catalog: catalog,
 		User:    auth.AnonymousUser(),

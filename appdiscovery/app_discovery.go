@@ -219,39 +219,3 @@ func filterGroup(group *Group, user UserGroupChecker) *Group {
 
 	return filtered
 }
-
-// FilterForAnonymous returns a filtered copy of the catalog tree,
-// keeping only apps that have no group restrictions (visible to everyone).
-func FilterForAnonymous(root *Group) *Group {
-	if root == nil {
-		return nil
-	}
-	return filterGroupAnonymous(root)
-}
-
-// filterGroupAnonymous recursively filters for anonymous users.
-func filterGroupAnonymous(group *Group) *Group {
-	filtered := &Group{
-		Path:   group.Path,
-		Apps:   nil,
-		Groups: nil,
-	}
-
-	// Keep only apps with no groups
-	for _, app := range group.Apps {
-		if len(app.Groups) == 0 {
-			filtered.Apps = append(filtered.Apps, app)
-		}
-	}
-
-	// Recursively filter child groups
-	for _, child := range group.Groups {
-		filteredChild := filterGroupAnonymous(child)
-		// Only include non-empty groups
-		if len(filteredChild.Apps) > 0 || len(filteredChild.Groups) > 0 {
-			filtered.Groups = append(filtered.Groups, filteredChild)
-		}
-	}
-
-	return filtered
-}

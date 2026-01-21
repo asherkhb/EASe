@@ -161,9 +161,10 @@ The script creates sample apps with group restrictions and an example users file
 
 EASe uses group-based access control:
 
-1. **Apps without groups** are visible to everyone (including anonymous users in public mode)
-2. **Apps with groups** are only visible to authenticated users who belong to at least one of those groups
-3. **Anonymous users** (public mode) can only see apps without group restrictions
+1. **Public mode** (no authentication) - all apps are visible to everyone, regardless of groups
+2. **Authenticated mode** with groups:
+   - **Apps without groups** are visible to all authenticated users
+   - **Apps with groups** are only visible to authenticated users who belong to at least one of those groups
 
 ### Security Features
 
